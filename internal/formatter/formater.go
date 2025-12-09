@@ -22,7 +22,7 @@ var (
 	highlight = color.New(color.BgHiBlack, color.FgHiWhite).SprintFunc()
 )
 
-func PrintHumanFriendly(commits []git.Commit, compact bool, showStats bool, showGraph bool) {
+func PrintHumanFriendly(commits []git.Commit, compact bool, showStats bool, showGraph bool, showFiles bool) {
 	for i, commit := range commits {
 		if showGraph {
 			printGraphLine(i, len(commits))
@@ -32,6 +32,10 @@ func PrintHumanFriendly(commits []git.Commit, compact bool, showStats bool, show
 		
 		if !compact && commit.Body != "" {
 			printCommitBody(commit.Body)
+		}
+		
+		if showFiles && len(commit.FileChanges) > 0 {
+			printFileChanges(commit.FileChanges)
 		}
 		
 		if showStats && commit.Stats != nil {
@@ -48,7 +52,7 @@ func PrintHumanFriendly(commits []git.Commit, compact bool, showStats bool, show
 	}
 }
 
-func PrintDetailed(commits []git.Commit, showStats bool, showGraph bool) {
+func PrintDetailed(commits []git.Commit, showStats bool, showGraph bool, showFiles bool) {
 	for i, commit := range commits {
 		if showGraph {
 			printGraphLine(i, len(commits))
@@ -62,6 +66,11 @@ func PrintDetailed(commits []git.Commit, showStats bool, showGraph bool) {
 		
 		if commit.Body != "" {
 			fmt.Printf("%s\n%s\n\n", bold("Description:"), cyan(commit.Body))
+		}
+		
+		if showFiles && len(commit.FileChanges) > 0 {
+			printDetailedFileChanges(commit.FileChanges)
+			fmt.Println()
 		}
 		
 		if showStats && commit.Stats != nil {
@@ -81,13 +90,14 @@ func PrintDetailed(commits []git.Commit, showStats bool, showGraph bool) {
 	}
 }
 
-func PrintCompact(commits []git.Commit) {
+func PrintCompact(commits []git.Commit, showFiles bool) {
 	for _, commit := range commits {
 		timeAgo := formatTimeAgo(commit.AuthorDate)
 		branchInfo := ""
 		if len(commit.RefNames) > 0 {
 			branchInfo = fmt.Sprintf(" [%s]", strings.Join(getBranchNames(commit.RefNames), ", "))
 		}
+		
 		fmt.Printf("%s %s - %s (%s)%s\n",
 			green(commit.ShortHash),
 			white(commit.Message),
@@ -95,19 +105,30 @@ func PrintCompact(commits []git.Commit) {
 			dim(timeAgo),
 			magenta(branchInfo),
 		)
+		
+		if showFiles && len(commit.FileChanges) > 0 {
+			printFileChangesCompact(commit.FileChanges)
+		}
 	}
 }
 
-func PrintOneline(commits []git.Commit) {
+func PrintOneline(commits []git.Commit, showFiles bool) {
 	for _, commit := range commits {
 		fmt.Printf("%s %s\n",
 			green(commit.ShortHash),
 			commit.Message,
 		)
+		
+		if showFiles && len(commit.FileChanges) > 0 {
+			for _, change := range commit.FileChanges {
+				statusColor := getStatusColor(change.Status)
+				fmt.Printf("  %s %s\n", statusColor(change.Status[:1]), change.FilePath)
+			}
+		}
 	}
 }
 
-func PrintChangelog(commits []git.Commit) {
+func PrintChangelog(commits []git.Commit, showFiles bool) {
 	currentDate := ""
 	for _, commit := range commits {
 		commitDate := commit.AuthorDate.Format("2006-01-02")
@@ -115,12 +136,29 @@ func PrintChangelog(commits []git.Commit) {
 			currentDate = commitDate
 			fmt.Printf("\n%s %s\n", bold("##"), formatDate(commit.AuthorDate))
 		}
+		
 		fmt.Printf("- %s", commit.Message)
 		
 		if len(commit.RefNames) > 0 {
 			fmt.Printf(" %s", magenta("["+strings.Join(getBranchNames(commit.RefNames), ", ")+"]"))
 		}
 		fmt.Printf(" %s\n", dim("("+commit.AuthorName+")"))
+		
+		if showFiles && len(commit.FileChanges) > 0 {
+			fmt.Println("  Changes:")
+			for _, change := range commit.FileChanges {
+				statusSymbol := getStatusSymbol(change.Status)
+				statusColor := getStatusColor(change.Status)
+				fmt.Printf("    %s %s", statusColor(statusSymbol), change.FilePath)
+				if change.Insertions > 0 || change.Deletions > 0 {
+					fmt.Printf(" (+%d/-%d)", change.Insertions, change.Deletions)
+				}
+				if change.OldPath != "" {
+					fmt.Printf(" (from %s)", dim(change.OldPath))
+				}
+				fmt.Println()
+			}
+		}
 		
 		if commit.Body != "" {
 			lines := strings.Split(strings.TrimSpace(commit.Body), "\n")
@@ -130,6 +168,144 @@ func PrintChangelog(commits []git.Commit) {
 				}
 			}
 		}
+	}
+}
+
+func printFileChanges(changes []git.FileChange) {
+	fmt.Printf("    %s\n", bold("Files:"))
+	for _, change := range changes {
+		statusColor := getStatusColor(change.Status)
+		statusSymbol := getStatusSymbol(change.Status)
+		
+		fmt.Printf("    %s %s", statusColor(statusSymbol), change.FilePath)
+		
+		if change.Insertions > 0 || change.Deletions > 0 {
+			fmt.Printf(" %s", dim(fmt.Sprintf("(+%d/-%d)", change.Insertions, change.Deletions)))
+		}
+		
+		if change.OldPath != "" {
+			fmt.Printf(" %s", dim(fmt.Sprintf("(renamed from %s)", change.OldPath)))
+		}
+		
+		fmt.Println()
+	}
+}
+
+func printDetailedFileChanges(changes []git.FileChange) {
+	fmt.Printf("%s\n", bold("File Changes:"))
+	
+	added := []git.FileChange{}
+	modified := []git.FileChange{}
+	deleted := []git.FileChange{}
+	renamed := []git.FileChange{}
+	other := []git.FileChange{}
+	
+	for _, change := range changes {
+		switch change.Status {
+		case "Added":
+			added = append(added, change)
+		case "Modified":
+			modified = append(modified, change)
+		case "Deleted":
+			deleted = append(deleted, change)
+		case "Renamed":
+			renamed = append(renamed, change)
+		default:
+			other = append(other, change)
+		}
+	}
+	
+	if len(added) > 0 {
+		fmt.Printf("  %s:\n", green("Added"))
+		for _, change := range added {
+			fmt.Printf("    %s", change.FilePath)
+			if change.Insertions > 0 {
+				fmt.Printf(" %s", dim(fmt.Sprintf("(+%d lines)", change.Insertions)))
+			}
+			fmt.Println()
+		}
+	}
+	
+	if len(modified) > 0 {
+		fmt.Printf("  %s:\n", yellow("Modified"))
+		for _, change := range modified {
+			fmt.Printf("    %s", change.FilePath)
+			if change.Insertions > 0 || change.Deletions > 0 {
+				fmt.Printf(" %s", dim(fmt.Sprintf("(+%d/-%d)", change.Insertions, change.Deletions)))
+			}
+			fmt.Println()
+		}
+	}
+	
+	if len(deleted) > 0 {
+		fmt.Printf("  %s:\n", red("Deleted"))
+		for _, change := range deleted {
+			fmt.Printf("    %s", change.FilePath)
+			if change.Deletions > 0 {
+				fmt.Printf(" %s", dim(fmt.Sprintf("(-%d lines)", change.Deletions)))
+			}
+			fmt.Println()
+		}
+	}
+	
+	if len(renamed) > 0 {
+		fmt.Printf("  %s:\n", cyan("Renamed"))
+		for _, change := range renamed {
+			fmt.Printf("    %s → %s", dim(change.OldPath), change.FilePath)
+			fmt.Println()
+		}
+	}
+	
+	if len(other) > 0 {
+		fmt.Printf("  %s:\n", magenta("Other"))
+		for _, change := range other {
+			fmt.Printf("    %s %s", change.Status, change.FilePath)
+			fmt.Println()
+		}
+	}
+}
+
+func printFileChangesCompact(changes []git.FileChange) {
+	for _, change := range changes {
+		statusColor := getStatusColor(change.Status)
+		statusSymbol := getStatusSymbol(change.Status)
+		fmt.Printf("  %s %s", statusColor(statusSymbol), change.FilePath)
+		if change.Insertions > 0 || change.Deletions > 0 {
+			fmt.Printf(" %s", dim(fmt.Sprintf("(+%d/-%d)", change.Insertions, change.Deletions)))
+		}
+		fmt.Println()
+	}
+}
+
+func getStatusColor(status string) func(...interface{}) string {
+	switch status {
+	case "Added":
+		return green
+	case "Modified":
+		return yellow
+	case "Deleted":
+		return red
+	case "Renamed", "Copied":
+		return cyan
+	default:
+		return magenta
+	}
+}
+
+func getStatusSymbol(status string) string {
+	switch status {
+	case "Added":
+		return "A"
+	case "Modified":
+		return "M"
+	case "Deleted":
+		return "D"
+	case "Renamed":
+		return "R"
+	case "Copied":
+		return "C"
+	default:
+		return "•"
 	}
 }
 
