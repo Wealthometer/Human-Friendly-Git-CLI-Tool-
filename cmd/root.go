@@ -82,4 +82,10 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&noMerges, "no-merges", false, "Exclude merge commits")
 	
 	rootCmd.MarkFlagsMutuallyExclusive("merges", "no-merges")
+
+	// Add web command
+	rootCmd.AddCommand(webCmd)
+	
+	// Ensure web command inherits the right flags
+	webCmd.Flags().AddFlagSet(rootCmd.PersistentFlags())
 }
