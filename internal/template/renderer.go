@@ -24,14 +24,14 @@ type TemplateData struct {
 }
 
 type RepoStats struct {
-	TotalCommits   int
-	TotalAuthors   int
-	FirstCommit    time.Time
-	LastCommit     time.Time
-	FilesChanged   int
+	TotalCommits    int
+	TotalAuthors    int
+	FirstCommit     time.Time
+	LastCommit      time.Time
+	FilesChanged    int
 	TotalInsertions int
 	TotalDeletions  int
-	Authors        map[string]AuthorStats
+	Authors         map[string]AuthorStats
 }
 
 type AuthorStats struct {
@@ -43,15 +43,15 @@ type AuthorStats struct {
 }
 
 type RenderOptions struct {
-	ShowFiles    bool
-	ShowStats    bool
-	GroupByDate  bool
+	ShowFiles     bool
+	ShowStats     bool
+	GroupByDate   bool
 	GroupByAuthor bool
-	Since        string
-	Until        string
-	Author       string
-	Theme        string // light, dark, auto
-	CompactView  bool
+	Since         string
+	Until         string
+	Author        string
+	Theme         string // light, dark, auto
+	CompactView   bool
 }
 
 type TemplateRenderer struct {
@@ -67,32 +67,61 @@ func NewRenderer(templateDir, assetDir string) (*TemplateRenderer, error) {
 
 	// Define template functions
 	funcMap := template.FuncMap{
-		"formatDate":       formatDate,
-		"formatTimeAgo":    formatTimeAgo,
-		"formatDateTime":   formatDateTime,
-		"shortHash":        shortHash,
-		"fileStatusColor":  fileStatusColor,
-		"fileStatusIcon":   fileStatusIcon,
-		"fileStatusText":   fileStatusText,
-		"commitStatus":     commitStatus,
-		"calculateAge":     calculateAge,
-		"pluralize":        pluralize,
-		"add":              add,
-		"subtract":         subtract,
-		"divide":           divide,
-		"multiply":         multiply,
-		"percentage":       percentage,
-		"truncate":         truncate,
-		"join":             strings.Join,
-		"contains":         strings.Contains,
-		"hasPrefix":        strings.HasPrefix,
-		"hasSuffix":        strings.HasSuffix,
-		"split":            strings.Split,
-		"toUpper":          strings.ToUpper,
-		"toLower":          strings.ToLower,
-		"replace":          strings.ReplaceAll,
-		"safeHTML":         func(s string) template.HTML { return template.HTML(s) },
-		"safeJS":           func(s string) template.JS { return template.JS(s) },
+		"formatDate":      formatDate,
+		"formatTimeAgo":   formatTimeAgo,
+		"formatDateTime":  formatDateTime,
+		"shortHash":       shortHash,
+		"fileStatusColor": fileStatusColor,
+		"fileStatusIcon":  fileStatusIcon,
+		"fileStatusText":  fileStatusText,
+		"commitStatus":    commitStatus,
+		"calculateAge":    calculateAge,
+		"pluralize":       pluralize,
+		"add":             add,
+		"subtract":        subtract,
+		"divide":          divide,
+		"multiply":        multiply,
+		"percentage":      percentage,
+		"truncate":        truncate,
+		"join":            strings.Join,
+		"contains":        strings.Contains,
+		"hasPrefix":       strings.HasPrefix,
+		"hasSuffix":       strings.HasSuffix,
+		"split":           strings.Split,
+		"toUpper":         strings.ToUpper,
+		"toLower":         strings.ToLower,
+		"replace":         strings.ReplaceAll,
+		"safeHTML":        func(s string) template.HTML { return template.HTML(s) },
+		"safeJS":          func(s string) template.JS { return template.JS(s) },
+		"dict": func(values ...interface{}) (map[string]interface{}, error) {
+			if len(values)%2 != 0 {
+				return nil, fmt.Errorf("dict requires even number of arguments")
+			}
+			dict := make(map[string]interface{}, len(values)/2)
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					return nil, fmt.Errorf("dict keys must be strings")
+				}
+				dict[key] = values[i+1]
+			}
+			return dict, nil
+		},
+		"json": func(v interface{}) (string, error) {
+			b, err := json.Marshal(v)
+			if err != nil {
+				return "", err
+			}
+			return string(b), nil
+		},
+		"upper": strings.ToUpper,
+		"lower": strings.ToLower,
+		"default": func(def, value string) string {
+			if value == "" {
+				return def
+			}
+			return value
+		},
 	}
 
 	// Load and parse templates
@@ -344,11 +373,11 @@ func copyDir(src, dst string) error {
 }
 
 func copyAssets(srcDir, destDir string) error {
-    if _, err := os.Stat(srcDir); os.IsNotExist(err) {
-        // Create default CSS if assets don't exist
-        return createDefaultAssets(destDir)
-    }
-    return copyDir(srcDir, destDir)
+	if _, err := os.Stat(srcDir); os.IsNotExist(err) {
+		// Create default CSS if assets don't exist
+		return createDefaultAssets(destDir)
+	}
+	return copyDir(srcDir, destDir)
 }
 
 // Additional template functions
@@ -380,13 +409,13 @@ func replaceAll(s, old, new string) string {
 }
 
 func createDefaultAssets(destDir string) error {
-    if err := os.MkdirAll(destDir, 0755); err != nil {
-        return err
-    }
-    
-    // Create default CSS file
-    cssPath := filepath.Join(destDir, "style.css")
-    return os.WriteFile(cssPath, []byte(defaultCSS), 0644)
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return err
+	}
+
+	// Create default CSS file
+	cssPath := filepath.Join(destDir, "style.css")
+	return os.WriteFile(cssPath, []byte(defaultCSS), 0644)
 }
 
 const defaultCSS = `/* Default CSS included when assets are not found */
