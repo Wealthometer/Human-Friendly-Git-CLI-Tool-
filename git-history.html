@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>human-git-history - Git History - Git History</title>
+    <meta name="description" content="A clean, human-friendly way to explore your Git history — without scrolling through a wall of cryptic commits like you’re hacking the Pentagon.">
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #9b59b6;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --card-bg: #f8f9fa;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --border-color: #404040;
+            --card-bg: #2d2d2d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <header class="header">
+            <h1><i class="fas fa-history"></i> human-git-history - Git History</h1>
+            <p class="subtitle">A clean, human-friendly way to explore your Git history — without scrolling through a wall of cryptic commits like you’re hacking the Pentagon.</p>
+            <div class="meta">
+                <span><i class="fas fa-calendar"></i> Generated: 2025-12-09 02:58:17</span>
+                <span><i class="fas fa-code-branch"></i> Commits: 21</span>
+                <span><i class="fas fa-users"></i> Authors: 1</span>
+            </div>
+        </header>
+
+        
+        <div class="controls">
+            <button class="btn" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i> Toggle Theme
+            </button>
+            <button class="btn" onclick="toggleStats()">
+                <i class="fas fa-chart-bar"></i> Toggle Stats
+            </button>
+            <button class="btn" onclick="exportToJSON()">
+                <i class="fas fa-download"></i> Export JSON
+            </button>
+            <div class="search">
+                <input type="text" id="searchInput" placeholder="Search commits...">
+                <button class="btn" onclick="searchCommits()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        
+<div id="statsPanel" class="stats-panel">
+    <h2>Repository Statistics</h2>
+    <div class="stat-item">
+        <strong>Total Commits:</strong> 21
+    </div>
+    <div class="stat-item">
+        <strong>Total Authors:</strong> 1
+    </div>
+    <div class="stat-item">
+        <strong>Lines of Code:</strong> 0
+        <small>(+0 / -0)</small>
+    </div>
+</div>
+
+
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="authorFilter">Author:</label>
+                <select id="authorFilter" onchange="filterByAuthor()">
+                    <option value="">All Authors</option>
+                    
+                    <option value="Wealthometer|wealthhajoh87@gmail.com">Wealthometer (21)</option>
+                    
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="dateFilter">Date Range:</label>
+                <input type="date" id="dateFrom" onchange="filterByDate()">
+                <input type="date" id="dateTo" onchange="filterByDate()">
+            </div>
+            <div class="filter-group">
+                <label for="typeFilter">Change Type:</label>
+                <select id="typeFilter" onchange="filterByType()">
+                    <option value="">All Changes</option>
+                    <option value="A">Added Files</option>
+                    <option value="M">Modified Files</option>
+                    <option value="D">Deleted Files</option>
+                    <option value="R">Renamed Files</option>
+                </select>
+            </div>
+        </div>
+
+        
+        <div class="commit-list">
+            
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">03a6ee9</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 02:35:18</span>
+    </div>
+    <div class="commit-message">Create stats.tpl</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">8e89840</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 02:35:16</span>
+    </div>
+    <div class="commit-message">Create index.tpl</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">259bc1b</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 02:35:14</span>
+    </div>
+    <div class="commit-message">Create commit.tpl</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">ca3b084</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 02:35:13</span>
+    </div>
+    <div class="commit-message">Create changelog.tpl</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">c931ec2</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 02:35:11</span>
+    </div>
+    <div class="commit-message">Create renderer.go</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">c913b0d</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 02:35:10</span>
+    </div>
+    <div class="commit-message">Create web.go</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">17f0be8</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 02:35:08</span>
+    </div>
+    <div class="commit-message">Update root.go</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">3ba617e</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 02:35:07</span>
+    </div>
+    <div class="commit-message">Create style.css</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">ee7299f</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:57:17</span>
+    </div>
+    <div class="commit-message">Update formater.go</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">3dab79c</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:57:16</span>
+    </div>
+    <div class="commit-message">Update human-git-history.exe</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">79c1f91</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:57:14</span>
+    </div>
+    <div class="commit-message">Update root.go</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">a712b45</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:53:23</span>
+    </div>
+    <div class="commit-message">Update git.go</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">00dd76b</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:51:56</span>
+    </div>
+    <div class="commit-message">Create human-git-history.exe</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">8af0a9d</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:51:52</span>
+    </div>
+    <div class="commit-message">Update git.go</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">37a241e</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:28:40</span>
+    </div>
+    <div class="commit-message">Create main.go</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">6eeb151</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:28:39</span>
+    </div>
+    <div class="commit-message">Create git.go</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">4a52a68</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:28:37</span>
+    </div>
+    <div class="commit-message">Create formater.go</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">63e68cc</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:28:36</span>
+    </div>
+    <div class="commit-message">Create go.sum</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">7cdc237</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:28:34</span>
+    </div>
+    <div class="commit-message">Create go.mod</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">57bf46d</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:28:33</span>
+    </div>
+    <div class="commit-message">Create root.go</div>
+</div>
+
+                
+                    <div class="commit-card" 
+     data-author="Wealthometer" 
+     data-date="2025-12-09">
+    <div class="commit-header">
+        <span class="commit-hash">d8bd8c7</span>
+        <span class="commit-author">Wealthometer</span>
+        <span class="commit-date">2025-12-09 01:28:26</span>
+    </div>
+    <div class="commit-message">Create Readme.MD</div>
+</div>
+
+                
+            
+        </div>
+
+        
+        <div class="pagination">
+            <button class="btn" onclick="loadMore()" id="loadMoreBtn">
+                <i class="fas fa-plus"></i> Load More Commits
+            </button>
+        </div>
+
+        
+        <footer class="footer">
+            <p>
+                Generated with <i class="fas fa-heart" style="color: #e74c3c;"></i> 
+                by Human Git History Tool
+            </p>
+            <p class="footer-links">
+                <a href="#" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i> Back to Top</a>
+                <a href="https://github.com" target="_blank"><i class="fab fa-github"></i> View on GitHub</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        
+        const savedTheme = localStorage.getItem('theme') || 'auto';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        
+        function toggleStats() {
+            const panel = document.getElementById('statsPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        
+        function searchCommits() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const commits = document.querySelectorAll('.commit-card');
+            
+            commits.forEach(commit => {
+                const text = commit.textContent.toLowerCase();
+                commit.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            });
+        }
+
+        
+        function filterByAuthor() {
+            const author = document.getElementById('authorFilter').value;
+            filterCommits('data-author', author);
+        }
+
+        
+        function filterByDate() {
+            const from = document.getElementById('dateFrom').value;
+            const to = document.getElementById('dateTo').value;
+            
+        }
+
+        
+        function filterByType() {
+            const type = document.getElementById('typeFilter').value;
+            if (!type) {
+                showAllCommits();
+                return;
+            }
+            filterCommits('data-change-type', type);
+        }
+
+        function filterCommits(attribute, value) {
+            const commits = document.querySelectorAll('.commit-card');
+            commits.forEach(commit => {
+                if (!value || commit.getAttribute(attribute) === value) {
+                    commit.style.display = 'block';
+                } else {
+                    commit.style.display = 'none';
+                }
+            });
+        }
+
+        function showAllCommits() {
+            document.querySelectorAll('.commit-card').forEach(c => c.style.display = 'block');
+        }
+
+        
+        function exportToJSON() {
+            const data = {
+                commits: "[{\"Hash\":\"03a6ee9adf06b900f575e5f56bcdc01f56095946\",\"ShortHash\":\"03a6ee9\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T02:35:18+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T02:35:18+01:00\",\"Message\":\"Create stats.tpl\",\"Body\":\" templates/stats.tpl | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++++\\n 1 file changed, 98 insertions(+)\",\"ParentHashes\":[\"8e89840f7ab34948adaa7200b610cf7725e80450\"],\"RefNames\":[\"HEAD -\\u003e master\",\"origin/master\",\"origin/HEAD\"],\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"8e89840f7ab34948adaa7200b610cf7725e80450\",\"ShortHash\":\"8e89840\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T02:35:16+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T02:35:16+01:00\",\"Message\":\"Create index.tpl\",\"Body\":\" templates/index.tpl | 265 ++++++++++++++++++++++++++++++++++++++++++++++++++++\\n 1 file changed, 265 insertions(+)\",\"ParentHashes\":[\"259bc1b3cc27422356d4b28db0662c938e10bdbc\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"259bc1b3cc27422356d4b28db0662c938e10bdbc\",\"ShortHash\":\"259bc1b\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T02:35:14+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T02:35:14+01:00\",\"Message\":\"Create commit.tpl\",\"Body\":\" templates/commit.tpl | 114 +++++++++++++++++++++++++++++++++++++++++++++++++++\\n 1 file changed, 114 insertions(+)\",\"ParentHashes\":[\"ca3b084ef9a7f9449169a46da52c05c1745935d9\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"ca3b084ef9a7f9449169a46da52c05c1745935d9\",\"ShortHash\":\"ca3b084\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T02:35:13+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T02:35:13+01:00\",\"Message\":\"Create changelog.tpl\",\"Body\":\" templates/changelog.tpl | 93 +++++++++++++++++++++++++++++++++++++++++++++++++\\n 1 file changed, 93 insertions(+)\",\"ParentHashes\":[\"c931ec2ac083f6a72e3d2ec02906d0da48789671\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"c931ec2ac083f6a72e3d2ec02906d0da48789671\",\"ShortHash\":\"c931ec2\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T02:35:11+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T02:35:11+01:00\",\"Message\":\"Create renderer.go\",\"Body\":\" internal/template/renderer.go | 406 ++++++++++++++++++++++++++++++++++++++++++\\n 1 file changed, 406 insertions(+)\",\"ParentHashes\":[\"c913b0d2850b5c03f71b5e07796cb26027584430\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"c913b0d2850b5c03f71b5e07796cb26027584430\",\"ShortHash\":\"c913b0d\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T02:35:10+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T02:35:10+01:00\",\"Message\":\"Create web.go\",\"Body\":\" cmd/web.go | 698 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\\n 1 file changed, 698 insertions(+)\",\"ParentHashes\":[\"17f0be8aefb43423fc1ffd263ca3d8ddc27be884\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"17f0be8aefb43423fc1ffd263ca3d8ddc27be884\",\"ShortHash\":\"17f0be8\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T02:35:08+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T02:35:08+01:00\",\"Message\":\"Update root.go\",\"Body\":\" cmd/root.go | 6 ++++++\\n 1 file changed, 6 insertions(+)\",\"ParentHashes\":[\"3ba617e3ebfac37ad961132d507face255eb0ea5\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"3ba617e3ebfac37ad961132d507face255eb0ea5\",\"ShortHash\":\"3ba617e\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T02:35:07+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T02:35:07+01:00\",\"Message\":\"Create style.css\",\"Body\":\" assets/style.css | 1143 ++++++++++++++++++++++++++++++++++++++++++++++++++++++\\n 1 file changed, 1143 insertions(+)\",\"ParentHashes\":[\"ee7299f7dc65c6c89704b80842b02f5232edc451\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"ee7299f7dc65c6c89704b80842b02f5232edc451\",\"ShortHash\":\"ee7299f\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:57:17+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:57:17+01:00\",\"Message\":\"Update formater.go\",\"Body\":\" internal/formatter/formater.go | 186 +++++++++++++++++++++++++++++++++++++++--\\n 1 file changed, 181 insertions(+), 5 deletions(-)\",\"ParentHashes\":[\"3dab79c773e4b54e5699d32ed94c2ee8ec219f40\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"3dab79c773e4b54e5699d32ed94c2ee8ec219f40\",\"ShortHash\":\"3dab79c\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:57:16+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:57:16+01:00\",\"Message\":\"Update human-git-history.exe\",\"Body\":\" human-git-history.exe | Bin 4342784 -\\u003e 4371968 bytes\\n 1 file changed, 0 insertions(+), 0 deletions(-)\",\"ParentHashes\":[\"79c1f91f66c7443202e5dd0c2c0521497f3e0008\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"79c1f91f66c7443202e5dd0c2c0521497f3e0008\",\"ShortHash\":\"79c1f91\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:57:14+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:57:14+01:00\",\"Message\":\"Update root.go\",\"Body\":\" cmd/root.go | 27 +++++++++++++++------------\\n 1 file changed, 15 insertions(+), 12 deletions(-)\",\"ParentHashes\":[\"a712b4587204cd3dab8148a1794472d91714877c\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"a712b4587204cd3dab8148a1794472d91714877c\",\"ShortHash\":\"a712b45\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:53:23+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:53:23+01:00\",\"Message\":\"Update git.go\",\"Body\":\" internal/git/git.go | 169 ++++++++++++++++++++++++++++++++++++++++++++++++----\\n 1 file changed, 159 insertions(+), 10 deletions(-)\",\"ParentHashes\":[\"00dd76b0030a5a650cbba0733f5ffb7381c56927\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"00dd76b0030a5a650cbba0733f5ffb7381c56927\",\"ShortHash\":\"00dd76b\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:51:56+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:51:56+01:00\",\"Message\":\"Create human-git-history.exe\",\"Body\":\" human-git-history.exe | Bin 0 -\\u003e 4342784 bytes\\n 1 file changed, 0 insertions(+), 0 deletions(-)\",\"ParentHashes\":[\"8af0a9d848f9bd3bb7cc24597bb92100e96242b1\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"8af0a9d848f9bd3bb7cc24597bb92100e96242b1\",\"ShortHash\":\"8af0a9d\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:51:52+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:51:52+01:00\",\"Message\":\"Update git.go\",\"Body\":\" internal/git/git.go | 90 ++++++++++++++++++++++++++++++++++++-----------------\\n 1 file changed, 61 insertions(+), 29 deletions(-)\",\"ParentHashes\":[\"37a241e2a45f2f0734ac1bd739c76fbb98d8b453\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"37a241e2a45f2f0734ac1bd739c76fbb98d8b453\",\"ShortHash\":\"37a241e\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:28:40+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:28:40+01:00\",\"Message\":\"Create main.go\",\"Body\":\" main.go | 7 +++++++\\n 1 file changed, 7 insertions(+)\",\"ParentHashes\":[\"6eeb1513f2c6d2454ce409357332e162923067b4\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"6eeb1513f2c6d2454ce409357332e162923067b4\",\"ShortHash\":\"6eeb151\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:28:39+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:28:39+01:00\",\"Message\":\"Create git.go\",\"Body\":\" internal/git/git.go | 181 ++++++++++++++++++++++++++++++++++++++++++++++++++++\\n 1 file changed, 181 insertions(+)\",\"ParentHashes\":[\"4a52a682c31007b1ba129f1265a2f20724249184\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"4a52a682c31007b1ba129f1265a2f20724249184\",\"ShortHash\":\"4a52a68\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:28:37+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:28:37+01:00\",\"Message\":\"Create formater.go\",\"Body\":\" internal/formatter/formater.go | 265 +++++++++++++++++++++++++++++++++++++++++\\n 1 file changed, 265 insertions(+)\",\"ParentHashes\":[\"63e68cc56251fdbf514d3670f5ed8e4b65249d06\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"63e68cc56251fdbf514d3670f5ed8e4b65249d06\",\"ShortHash\":\"63e68cc\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:28:36+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:28:36+01:00\",\"Message\":\"Create go.sum\",\"Body\":\" go.sum | 27 +++++++++++++++++++++++++++\\n 1 file changed, 27 insertions(+)\",\"ParentHashes\":[\"7cdc2373a475b0eebc42b288e8a9f1a2eb6688f4\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"7cdc2373a475b0eebc42b288e8a9f1a2eb6688f4\",\"ShortHash\":\"7cdc237\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:28:34+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:28:34+01:00\",\"Message\":\"Create go.mod\",\"Body\":\" go.mod | 16 ++++++++++++++++\\n 1 file changed, 16 insertions(+)\",\"ParentHashes\":[\"57bf46dafb76825157e0f5c9c83b29277c4b75d7\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"57bf46dafb76825157e0f5c9c83b29277c4b75d7\",\"ShortHash\":\"57bf46d\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:28:33+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:28:33+01:00\",\"Message\":\"Create root.go\",\"Body\":\" cmd/root.go | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\\n 1 file changed, 82 insertions(+)\",\"ParentHashes\":[\"d8bd8c7cfc44231ce24249011db20bc48174d151\"],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null},{\"Hash\":\"d8bd8c7cfc44231ce24249011db20bc48174d151\",\"ShortHash\":\"d8bd8c7\",\"AuthorName\":\"Wealthometer\",\"AuthorEmail\":\"wealthhajoh87@gmail.com\",\"AuthorDate\":\"2025-12-09T01:28:26+01:00\",\"Committer\":\"Wealthometer\",\"CommitDate\":\"2025-12-09T01:28:26+01:00\",\"Message\":\"Create Readme.MD\",\"Body\":\" Readme.MD | 62 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\\n 1 file changed, 62 insertions(+)\",\"ParentHashes\":[],\"RefNames\":null,\"Stats\":null,\"FileChanges\":null}]",
+                stats: "{\"TotalCommits\":21,\"TotalAuthors\":1,\"FirstCommit\":\"2025-12-09T01:28:26+01:00\",\"LastCommit\":\"2025-12-09T02:35:18+01:00\",\"FilesChanged\":0,\"TotalInsertions\":0,\"TotalDeletions\":0,\"Authors\":{\"Wealthometer|wealthhajoh87@gmail.com\":{\"Name\":\"Wealthometer\",\"Email\":\"wealthhajoh87@gmail.com\",\"Commits\":21,\"Insertions\":0,\"Deletions\":0}}}",
+                generatedAt: "2025-12-09 02:58:17"
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'git-history.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        
+        function loadMore() {
+            
+            alert('Load more functionality would fetch additional commits');
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Commits',
+                        data: [12, 19, 3, 5, 2, 3],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                }
+            });
+        });
+    </script>
+</body>
+</html>
