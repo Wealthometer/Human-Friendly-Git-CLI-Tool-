@@ -85,26 +85,31 @@ func parseGitLog(output string) ([]Commit, error) {
 	scanner := bufio.NewScanner(strings.NewReader(output))
 	
 	var currentCommit *Commit
-	var parsingStats bool
 	var statLines []string
+	var inStats bool
+	var bodyLines []string
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		
-		if strings.Contains(line, "|") && !parsingStats {
+		// Check if this is a commit header line
+		if strings.Count(line, "|") >= 10 {
+			// Save previous commit if exists
 			if currentCommit != nil {
+				// Process stats for previous commit
 				if len(statLines) > 0 {
 					stats := parseStats(statLines)
 					currentCommit.Stats = stats
-					statLines = []string{}
+				}
+				// Join body lines
+				if len(bodyLines) > 0 {
+					currentCommit.Body = strings.Join(bodyLines, "\n")
 				}
 				commits = append(commits, *currentCommit)
 			}
 			
+			// Parse new commit
 			parts := strings.SplitN(line, "|", 11)
-			if len(parts) < 11 {
-				continue
-			}
 			
 			authorDate, _ := time.Parse(time.RFC3339, parts[4])
 			commitDate, _ := time.Parse(time.RFC3339, parts[6])
@@ -117,23 +122,45 @@ func parseGitLog(output string) ([]Commit, error) {
 				AuthorDate:   authorDate,
 				Committer:    parts[5],
 				CommitDate:   commitDate,
-				Message:      parts[7],
-				Body:         parts[8],
+				Message:      strings.TrimSpace(parts[7]),
+				Body:         "",
 				ParentHashes: strings.Fields(parts[9]),
 				RefNames:     parseRefNames(parts[10]),
 			}
-			parsingStats = false
+			
+			// Reset for new commit
+			bodyLines = []string{}
+			statLines = []string{}
+			inStats = false
+			
+			// Add initial body if present
+			if parts[8] != "" {
+				bodyLines = append(bodyLines, strings.TrimSpace(parts[8]))
+			}
+			
 		} else if line == "" {
-			parsingStats = true
-		} else if parsingStats && strings.Contains(line, "|") {
+			// Empty line could be end of body or start of stats
+			if !inStats && len(bodyLines) > 0 {
+				// This empty line might separate body from stats
+				inStats = true
+			}
+		} else if inStats {
+			// Collect stat lines
 			statLines = append(statLines, line)
+		} else if currentCommit != nil {
+			// This is part of the commit body
+			bodyLines = append(bodyLines, line)
 		}
 	}
 	
+	// Don't forget the last commit
 	if currentCommit != nil {
 		if len(statLines) > 0 {
 			stats := parseStats(statLines)
 			currentCommit.Stats = stats
+		}
+		if len(bodyLines) > 0 {
+			currentCommit.Body = strings.Join(bodyLines, "\n")
 		}
 		commits = append(commits, *currentCommit)
 	}
@@ -143,7 +170,12 @@ func parseGitLog(output string) ([]Commit, error) {
 
 func parseRefNames(refStr string) []string {
 	var refs []string
-	for _, ref := range strings.Split(refStr, ", ") {
+	if refStr == "" {
+		return refs
+	}
+	
+	// Split by comma and trim spaces
+	for _, ref := range strings.Split(refStr, ",") {
 		ref = strings.TrimSpace(ref)
 		if ref != "" {
 			refs = append(refs, ref)
@@ -155,25 +187,25 @@ func parseRefNames(refStr string) []string {
 func parseStats(statLines []string) *CommitStats {
 	stats := &CommitStats{}
 	
+	// Look for the summary line
 	for _, line := range statLines {
-		if strings.Contains(line, "|") {
-			stats.FilesChanged++
-			parts := strings.Split(line, "|")
-			if len(parts) > 1 {
-				changes := strings.TrimSpace(parts[1])
-				if strings.Contains(changes, "+") && strings.Contains(changes, "-") {
-					var insertions, deletions int
-					fmt.Sscanf(changes, "%d insertions(+), %d deletions(-)", &insertions, &deletions)
-					stats.Insertions += insertions
-					stats.Deletions += deletions
-				}
+		if strings.Contains(line, "files changed") || 
+		   strings.Contains(line, "insertion") || 
+		   strings.Contains(line, "deletion") {
+			// Parse summary line like: "2 files changed, 15 insertions(+), 3 deletions(-)"
+			var files, insertions, deletions int
+			n, _ := fmt.Sscanf(line, "%d files changed, %d insertions(+), %d deletions(-)", 
+				&files, &insertions, &deletions)
+			if n >= 1 {
+				stats.FilesChanged = files
 			}
-		} else if strings.Contains(line, "insertion") || strings.Contains(line, "deletion") {
-			var insertions, deletions int
-			fmt.Sscanf(line, "%d files changed, %d insertions(+), %d deletions(-)", 
-				&stats.FilesChanged, &insertions, &deletions)
-			stats.Insertions = insertions
-			stats.Deletions = deletions
+			if n >= 2 {
+				stats.Insertions = insertions
+			}
+			if n >= 3 {
+				stats.Deletions = deletions
+			}
+			break
 		}
 	}
 	
