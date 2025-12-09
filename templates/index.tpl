@@ -62,9 +62,20 @@
         </div>
 
         <!-- Stats Panel -->
-        <div id="statsPanel" class="stats-panel">
-            {{template "stats.tpl" .Stats}}
-        </div>
+<div id="statsPanel" class="stats-panel">
+    <h2>Repository Statistics</h2>
+    <div class="stat-item">
+        <strong>Total Commits:</strong> {{.Stats.TotalCommits}}
+    </div>
+    <div class="stat-item">
+        <strong>Total Authors:</strong> {{.Stats.TotalAuthors}}
+    </div>
+    <div class="stat-item">
+        <strong>Lines of Code:</strong> {{add .Stats.TotalInsertions .Stats.TotalDeletions}}
+        <small>(+{{.Stats.TotalInsertions}} / -{{.Stats.TotalDeletions}})</small>
+    </div>
+</div>
+
 
         <!-- Filter Bar -->
         <div class="filters">
@@ -106,7 +117,16 @@
                             <h2><i class="fas fa-calendar-day"></i> {{$currentDate}}</h2>
                         </div>
                     {{end}}
-                    {{template "commit.tpl" (dict "Commit" . "Options" $.Options)}}
+                    tmpl, err := template.New("index.tpl").Funcs(funcMap).ParseFiles(
+    "templates/index.tpl",
+    "templates/commit.tpl",
+    "templates/stats.tpl",
+)
+if err != nil {
+    fmt.Fprintf(os.Stderr, "Error parsing templates: %v\n", err)
+    os.Exit(1)
+}
+
                 {{end}}
             {{else if .Options.GroupByAuthor}}
                 {{$currentAuthor := ""}}
@@ -117,11 +137,31 @@
                             <h2><i class="fas fa-user"></i> {{$currentAuthor}}</h2>
                         </div>
                     {{end}}
-                    {{template "commit.tpl" (dict "Commit" . "Options" $.Options)}}
+                    <div class="commit-card" 
+     data-author="{{.AuthorName}}" 
+     data-date="{{.AuthorDate | formatDate}}">
+    <div class="commit-header">
+        <span class="commit-hash">{{.ShortHash}}</span>
+        <span class="commit-author">{{.AuthorName}}</span>
+        <span class="commit-date">{{.AuthorDate | formatDateTime}}</span>
+    </div>
+    <div class="commit-message">{{.Message}}</div>
+</div>
+
                 {{end}}
             {{else}}
                 {{range .Commits}}
-                    {{template "commit.tpl" (dict "Commit" . "Options" $.Options)}}
+                    <div class="commit-card" 
+     data-author="{{.AuthorName}}" 
+     data-date="{{.AuthorDate | formatDate}}">
+    <div class="commit-header">
+        <span class="commit-hash">{{.ShortHash}}</span>
+        <span class="commit-author">{{.AuthorName}}</span>
+        <span class="commit-date">{{.AuthorDate | formatDateTime}}</span>
+    </div>
+    <div class="commit-message">{{.Message}}</div>
+</div>
+
                 {{end}}
             {{end}}
         </div>
