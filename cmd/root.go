@@ -18,6 +18,7 @@ var (
 	format     string
 	compact    bool
 	showStats  bool
+	showFiles  bool // New flag
 	graph      bool
 	mergesOnly bool
 	noMerges   bool
@@ -30,13 +31,14 @@ var rootCmd = &cobra.Command{
 human-friendly format with various display options.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		commits, err := git.GetCommits(git.CommitOptions{
-			Limit:      limit,
-			Author:     author,
-			Since:      since,
-			Until:      until,
-			Branch:     branch,
-			MergesOnly: mergesOnly,
-			NoMerges:   noMerges,
+			Limit:          limit,
+			Author:         author,
+			Since:          since,
+			Until:          until,
+			Branch:         branch,
+			MergesOnly:     mergesOnly,
+			NoMerges:       noMerges,
+			ShowFileChanges: showFiles,
 		})
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error getting commits: %v\n", err)
@@ -45,15 +47,15 @@ human-friendly format with various display options.`,
 
 		switch format {
 		case "detailed":
-			formatter.PrintDetailed(commits, showStats, graph)
+			formatter.PrintDetailed(commits, showStats, graph, showFiles)
 		case "compact":
-			formatter.PrintCompact(commits)
+			formatter.PrintCompact(commits, showFiles)
 		case "oneline":
-			formatter.PrintOneline(commits)
+			formatter.PrintOneline(commits, showFiles)
 		case "changelog":
-			formatter.PrintChangelog(commits)
+			formatter.PrintChangelog(commits, showFiles)
 		default:
-			formatter.PrintHumanFriendly(commits, compact, showStats, graph)
+			formatter.PrintHumanFriendly(commits, compact, showStats, graph, showFiles)
 		}
 	},
 }
@@ -74,6 +76,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&format, "format", "f", "", "Output format (detailed, compact, oneline, changelog)")
 	rootCmd.PersistentFlags().BoolVarP(&compact, "compact", "c", false, "Compact output")
 	rootCmd.PersistentFlags().BoolVar(&showStats, "stats", false, "Show file statistics")
+	rootCmd.PersistentFlags().BoolVar(&showFiles, "files", false, "Show changed files with details") // New flag
 	rootCmd.PersistentFlags().BoolVar(&graph, "graph", false, "Show ASCII commit graph")
 	rootCmd.PersistentFlags().BoolVar(&mergesOnly, "merges", false, "Show only merge commits")
 	rootCmd.PersistentFlags().BoolVar(&noMerges, "no-merges", false, "Exclude merge commits")
