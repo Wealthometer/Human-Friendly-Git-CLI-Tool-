@@ -22,6 +22,15 @@ type Commit struct {
 	ParentHashes []string
 	RefNames     []string
 	Stats        *CommitStats
+	FileChanges  []FileChange // New field for detailed file changes
+}
+
+type FileChange struct {
+	Status   string // Added, Modified, Deleted, Renamed, Copied
+	FilePath string
+	OldPath  string // For renames/copies
+	Insertions int
+	Deletions  int
 }
 
 type CommitStats struct {
@@ -31,13 +40,14 @@ type CommitStats struct {
 }
 
 type CommitOptions struct {
-	Limit      int
-	Author     string
-	Since      string
-	Until      string
-	Branch     string
-	MergesOnly bool
-	NoMerges   bool
+	Limit          int
+	Author         string
+	Since          string
+	Until          string
+	Branch         string
+	MergesOnly     bool
+	NoMerges       bool
+	ShowFileChanges bool // New option
 }
 
 func GetCommits(options CommitOptions) ([]Commit, error) {
@@ -46,6 +56,10 @@ func GetCommits(options CommitOptions) ([]Commit, error) {
 		"--pretty=format:%H|%h|%an|%ae|%ad|%cn|%cd|%s|%b|%P|%D",
 		"--date=iso-strict",
 		"--stat",
+	}
+
+	if options.ShowFileChanges {
+		args = append(args, "--name-status") // Show detailed file changes
 	}
 
 	if options.Limit > 0 {
@@ -77,16 +91,33 @@ func GetCommits(options CommitOptions) ([]Commit, error) {
 		return nil, fmt.Errorf("failed to execute git log: %v", err)
 	}
 
-	return parseGitLog(string(output))
+	commits, err := parseGitLog(string(output), options.ShowFileChanges)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get detailed diff stats for each commit if requested
+	if options.ShowFileChanges {
+		for i := range commits {
+			detailedStats, err := getDetailedDiffStats(commits[i].Hash)
+			if err == nil {
+				commits[i].FileChanges = detailedStats
+			}
+		}
+	}
+
+	return commits, nil
 }
 
-func parseGitLog(output string) ([]Commit, error) {
+func parseGitLog(output string, showFileChanges bool) ([]Commit, error) {
 	var commits []Commit
 	scanner := bufio.NewScanner(strings.NewReader(output))
 	
 	var currentCommit *Commit
 	var statLines []string
+	var nameStatusLines []string
 	var inStats bool
+	var inNameStatus bool
 	var bodyLines []string
 
 	for scanner.Scan() {
@@ -100,6 +131,10 @@ func parseGitLog(output string) ([]Commit, error) {
 				if len(statLines) > 0 {
 					stats := parseStats(statLines)
 					currentCommit.Stats = stats
+				}
+				// Parse name-status lines
+				if len(nameStatusLines) > 0 && showFileChanges {
+					currentCommit.FileChanges = parseNameStatus(nameStatusLines)
 				}
 				// Join body lines
 				if len(bodyLines) > 0 {
@@ -131,7 +166,9 @@ func parseGitLog(output string) ([]Commit, error) {
 			// Reset for new commit
 			bodyLines = []string{}
 			statLines = []string{}
+			nameStatusLines = []string{}
 			inStats = false
+			inNameStatus = false
 			
 			// Add initial body if present
 			if parts[8] != "" {
@@ -139,11 +176,24 @@ func parseGitLog(output string) ([]Commit, error) {
 			}
 			
 		} else if line == "" {
-			// Empty line could be end of body or start of stats
+			// Empty line could be end of body or start of stats/name-status
 			if !inStats && len(bodyLines) > 0 {
 				// This empty line might separate body from stats
 				inStats = true
+				if showFileChanges {
+					inNameStatus = true
+				}
 			}
+		} else if inNameStatus && !strings.Contains(line, "|") && 
+		          (strings.Contains(line, "files changed") || 
+		           strings.Contains(line, "insertion") || 
+		           strings.Contains(line, "deletion")) {
+			// This is a stat summary line, not a name-status line
+			statLines = append(statLines, line)
+			inNameStatus = false
+		} else if inNameStatus && len(strings.Fields(line)) >= 2 {
+			// Collect name-status lines (format: "M\tfile.go" or "R100\told.txt\tnew.txt")
+			nameStatusLines = append(nameStatusLines, line)
 		} else if inStats {
 			// Collect stat lines
 			statLines = append(statLines, line)
@@ -159,6 +209,9 @@ func parseGitLog(output string) ([]Commit, error) {
 			stats := parseStats(statLines)
 			currentCommit.Stats = stats
 		}
+		if len(nameStatusLines) > 0 && showFileChanges {
+			currentCommit.FileChanges = parseNameStatus(nameStatusLines)
+		}
 		if len(bodyLines) > 0 {
 			currentCommit.Body = strings.Join(bodyLines, "\n")
 		}
@@ -166,6 +219,102 @@ func parseGitLog(output string) ([]Commit, error) {
 	}
 	
 	return commits, scanner.Err()
+}
+
+func parseNameStatus(lines []string) []FileChange {
+	var changes []FileChange
+	
+	for _, line := range lines {
+		fields := strings.Fields(line)
+		if len(fields) < 2 {
+			continue
+		}
+		
+		status := fields[0]
+		change := FileChange{Status: getStatusSymbol(status)}
+		
+		switch {
+		case status[0] == 'R' || status[0] == 'C': // Renamed or Copied
+			if len(fields) >= 3 {
+				change.OldPath = fields[1]
+				change.FilePath = fields[2]
+			}
+		default: // Added, Modified, Deleted
+			change.FilePath = fields[1]
+		}
+		
+		changes = append(changes, change)
+	}
+	
+	return changes
+}
+
+func getStatusSymbol(status string) string {
+	switch status[0] {
+	case 'A':
+		return "Added"
+	case 'M':
+		return "Modified"
+	case 'D':
+		return "Deleted"
+	case 'R':
+		return "Renamed"
+	case 'C':
+		return "Copied"
+	case 'T':
+		return "Type Changed"
+	default:
+		return "Changed"
+	}
+}
+
+func getDetailedDiffStats(hash string) ([]FileChange, error) {
+	// Use git show with --numstat for detailed per-file stats
+	cmd := exec.Command("git", "show", "--numstat", "--pretty=format:", hash)
+	output, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	
+	return parseNumStatOutput(string(output)), nil
+}
+
+func parseNumStatOutput(output string) []FileChange {
+	var changes []FileChange
+	scanner := bufio.NewScanner(strings.NewReader(output))
+	
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		
+		fields := strings.Fields(line)
+		if len(fields) >= 3 {
+			var insertions, deletions int
+			fmt.Sscanf(fields[0], "%d", &insertions)
+			fmt.Sscanf(fields[1], "%d", &deletions)
+			
+			// Determine status based on insertions/deletions
+			status := "Modified"
+			if insertions > 0 && deletions == 0 {
+				status = "Added"
+			} else if insertions == 0 && deletions > 0 {
+				status = "Deleted"
+			}
+			
+			change := FileChange{
+				Status:     status,
+				FilePath:   fields[2],
+				Insertions: insertions,
+				Deletions:  deletions,
+			}
+			
+			changes = append(changes, change)
+		}
+	}
+	
+	return changes
 }
 
 func parseRefNames(refStr string) []string {
